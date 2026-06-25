@@ -970,7 +970,7 @@ function renderQuiz() {
   document.getElementById('quiz-next-wrap').innerHTML = '';
   var choicesEl = document.getElementById('quiz-choices');
   choicesEl.innerHTML = '';
-  var marks = ['①', '②', '③', '④'];
+  var marks = ['①', '②', '③', '④', '⑤'];
   q.choices.forEach(function(c, i) {
     var btn = document.createElement('button');
     btn.className = 'choice-btn';

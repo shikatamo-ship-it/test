@@ -986,7 +986,7 @@ function renderQuiz() {
   var total = quizPool.length;
   document.getElementById('quiz-counter').textContent = '問題 ' + (quizIdx + 1) + ' / ' + total;
   document.getElementById('quiz-progress').style.width = (quizIdx / total * 100) + '%';
-  document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
   document.getElementById('quiz-question').textContent = 'Q' + (quizIdx + 1) + '. ' + q.question;
   document.getElementById('quiz-explanation').classList.remove('show');
   document.getElementById('quiz-explanation').innerHTML = '';
@@ -1006,20 +1006,6 @@ function renderQuiz() {
     if (!btn || btn.disabled) return;
     answerQuiz(parseInt(btn.getAttribute('data-idx')), q);
   };
-}
-function answerQuiz(selected, q) {
-  var choiceBtns = document.querySelectorAll('#quiz-choices .choice-btn');
-  choiceBtns.forEach(function(b) { b.disabled = true; });
-  var correct = selected === q.answer;
-  recordAnswer(q.id, q.subject, correct);
-  choiceBtns.forEach(function(b, i) {
-    if (i === q.answer) b.classList.add('correct');
-    else if (i === selected && !correct) b.classList.add('wrong');
-  });
-  var exp = document.getElementById('quiz-explanation');
-  exp.innerHTML = '<strong>' + (correct ? '✅ 正解！' : '❌ 不正解') + '</strong><br>' + q.explanation;
-  exp.classList.add('show');
-  document.getElementById('quiz-next-wrap').innerHTML = '<button class="btn btn-primary" onclick="quizIdx++;renderQuiz()">次の問題</button>';
 }
 
 // ===== 過去問 =====
@@ -1046,7 +1032,7 @@ function renderPast() {
   var total = pastPool.length;
   document.getElementById('past-counter').textContent = '問題 ' + (pastIdx + 1) + ' / ' + total;
   document.getElementById('past-progress').style.width = (pastIdx / total * 100) + '%';
- document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
+document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
   document.getElementById('past-question').textContent = 'Q' + (pastIdx + 1) + '. ' + q.question;
   document.getElementById('past-explanation').classList.remove('show');
   document.getElementById('past-explanation').innerHTML = '';
@@ -1080,6 +1066,20 @@ function answerPast(selected, q) {
   exp.innerHTML = '<strong>' + (correct ? '✅ 正解！' : '❌ 不正解') + '</strong><br>' + q.explanation;
   exp.classList.add('show');
   document.getElementById('past-next-wrap').innerHTML = '<button class="btn btn-primary" onclick="pastIdx++;renderPast()">次の問題</button>';
+}
+function answerQuiz(selected, q) {
+  var choiceBtns = document.querySelectorAll('#quiz-choices .choice-btn');
+  choiceBtns.forEach(function(b) { b.disabled = true; });
+  var correct = selected === q.answer;
+  recordAnswer(q.id, q.subject, correct);
+  choiceBtns.forEach(function(b, i) {
+    if (i === q.answer) b.classList.add('correct');
+    else if (i === selected && !correct) b.classList.add('wrong');
+  });
+  var exp = document.getElementById('quiz-explanation');
+  exp.innerHTML = '<strong>' + (correct ? '✅ 正解！' : '❌ 不正解') + '</strong><br>' + q.explanation;
+  exp.classList.add('show');
+  document.getElementById('quiz-next-wrap').innerHTML = '<button class="btn btn-primary" onclick="quizIdx++;renderQuiz()">次の問題</button>';
 }
 
 // ===== 模擬試験 =====
@@ -1182,6 +1182,7 @@ function showExamReview() {
 function closeModal() { document.getElementById('result-modal').classList.remove('show'); }
 
 // ===== 弱点分析 =====
+// ===== 弱点分析 =====
 var SUBJECTS = ['環化', '環濃', '管理', '法規'];
 var SUBJECT_LABELS = { '環化': '環境計量士：環化', '環濃': '環境計量士：環濃', '管理': '計量管理', '法規': '計量法規' };  
 function updateWeak() {
@@ -1235,7 +1236,7 @@ function resetData() {
   }
 }
 
- // ===== ナレッジデータ =====
+// ===== ナレッジデータ =====
 var KNOWLEDGE = [];
 
 function getRelatedKnowledge(questionText) {
@@ -1250,7 +1251,7 @@ function getRelatedKnowledge(questionText) {
 function buildKnowledgeHTML(questionText) {
   var list = getRelatedKnowledge(questionText);
   if (list.length === 0) return '';
-  var html = '<div class="knowledge-box">';
+  var html = '<div class="knowledge-box" onclick="event.stopPropagation()">';
   html += '<div class="knowledge-title">📖 関連ナレッジ</div>';
   list.forEach(function(k) {
     html += '<details class="knowledge-item">';
@@ -1260,7 +1261,8 @@ function buildKnowledgeHTML(questionText) {
   });
   html += '</div>';
   return html;
-} 
+}
+
 var activeTagFilter = 'all';
 
 function getAllTags() {

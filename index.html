@@ -1174,8 +1174,9 @@ function showExamReview() {
 function closeModal() { document.getElementById('result-modal').classList.remove('show'); }
 
 // ===== 弱点分析 =====
-var SUBJECTS = ['基礎', '化学', '計量', '管理', '分析', '測定'];
-var SUBJECT_LABELS = { '基礎': '共通：基礎科学', '化学': '共通：化学', '計量': '計量法規', '管理': '計量管理', '分析': '分析概論', '測定': '測定技術' };
+// ===== 弱点分析 =====
+var SUBJECTS = ['環化', '環濃', '管理', '法規'];
+var SUBJECT_LABELS = { '環化': '環境計量士：環化', '環濃': '環境計量士：環濃', '管理': '計量管理', '法規': '計量法規' };  
 function updateWeak() {
   var d = loadData();
   var total = d.results.length;

@@ -1038,7 +1038,7 @@ function renderPast() {
   var total = pastPool.length;
   document.getElementById('past-counter').textContent = '問題 ' + (pastIdx + 1) + ' / ' + total;
   document.getElementById('past-progress').style.width = (pastIdx / total * 100) + '%';
-  document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+ document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
   document.getElementById('past-question').textContent = 'Q' + (pastIdx + 1) + '. ' + q.question;
   document.getElementById('past-explanation').classList.remove('show');
   document.getElementById('past-explanation').innerHTML = '';

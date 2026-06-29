@@ -1386,3 +1386,13 @@ showSection('home');
 </script>
 </body>
 </html>
+
+
+.knowledge-box { margin-top:12px; border-top:1px solid #e2e8f0; padding-top:10px; }
+.knowledge-title { font-size:0.8rem; font-weight:700; color:#4a5568; margin-bottom:6px; }
+.knowledge-item { margin-bottom:6px; }
+.knowledge-item summary { font-size:0.85rem; color:#3182ce; cursor:pointer; padding:4px 6px; border-radius:4px; list-style:none; }
+.knowledge-item summary::before { content:"▶ "; font-size:0.7rem; }
+.knowledge-item[open] summary::before { content:"▼ "; }
+.knowledge-item summary:hover { background:#ebf8ff; }
+.knowledge-content { font-size:0.82rem; line-height:1.7; color:#4a5568; padding:8px 10px; background:#f7fafc; border-radius:4px; margin-top:4px; }

@@ -3271,8 +3271,7 @@ var KNOWLEDGE = [];
 function getRelatedKnowledge(questionText) {
   if (!KNOWLEDGE || KNOWLEDGE.length === 0) return [];
   return KNOWLEDGE.filter(function(k) {
-    return k.tags.some(function(tag) {
-      // 単語の境界や「環境基本法第1条」などの完全一致キーワードを厳密にチェック
+    return (k.tags || []).some(function(tag) {
       if (!tag) return false;
       return questionText.indexOf(tag) !== -1;
     });
@@ -3287,39 +3286,11 @@ function buildKnowledgeHTML(questionText) {
   list.forEach(function(k) {
     html += '<details class="knowledge-item">';
     html += '<summary>' + k.title + '</summary>';
-     html += '<div class="knowledge-content">' + k.body + '</div>';
+    html += '<div class="knowledge-content">' + k.body + '</div>';
     html += '</details>';
   });
   html += '</div>';
   return html;
-}
-
-var activeTagFilter = 'all';
-
-function getAllTags() {
-  var kn = loadKnowledge();
-  var tagSet = {};
-  kn.forEach(function(k) {
-    (k.tags || []).forEach(function(t) { tagSet[t] = true; });
-  });
-  return Object.keys(tagSet).sort();
-}
-
-function renderTagFilters() {
-  var tags = getAllTags();
-  var wrap = document.getElementById('knowledge-tag-filters');
-  var html = '<span class="tag-filter' + (activeTagFilter === 'all' ? ' active' : '') + '" data-tag="all">すべて</span>';
-  tags.forEach(function(t) {
-    html += '<span class="tag-filter' + (activeTagFilter === t ? ' active' : '') + '" data-tag="' + escHtml(t) + '">' + escHtml(t) + '</span>';
-  });
-  wrap.innerHTML = html;
-  wrap.onclick = function(e) {
-    var el = e.target.closest('.tag-filter');
-    if (!el) return;
-    activeTagFilter = el.getAttribute('data-tag');
-    renderTagFilters();
-    renderKnowledge();
-  };
 }
 
 function escHtml(str) {
@@ -3333,15 +3304,14 @@ function highlight(text, keyword) {
   return escaped.replace(new RegExp('(' + escapedKw + ')', 'gi'), '<span class="highlight">$1</span>');
 }
 
+// ⬇️ タブフィルター処理を完全に撤廃し、キーワード検索のみに簡素化しました
 function renderKnowledge() {
   var kn = loadKnowledge();
   var keyword = (document.getElementById('knowledge-search').value || '').trim().toLowerCase();
   var listEl = document.getElementById('knowledge-list');
 
-  // フィルタ
+  // キーワードのみでフィルタリング
   var filtered = kn.filter(function(k) {
-    var matchTag = activeTagFilter === 'all' || (k.tags || []).indexOf(activeTagFilter) !== -1;
-    if (!matchTag) return false;
     if (!keyword) return true;
     return (
       k.title.toLowerCase().indexOf(keyword) !== -1 ||
@@ -3382,6 +3352,7 @@ function toggleKnowledgeCard(id) {
   if (card) card.classList.toggle('open');
 }
 
+// ⬇️ ナレッジ追加フォームの表示切り替え
 function toggleAddForm() {
   var wrap = document.getElementById('add-form-wrap');
   wrap.classList.toggle('show');
@@ -3393,6 +3364,7 @@ function toggleAddForm() {
   }
 }
 
+// ⬇️ ナレッジ追加処理（renderTagFiltersを排除し、KNOWLEDGE変数に即時同期）
 function addKnowledge() {
   var title = document.getElementById('kf-title').value.trim();
   var body = document.getElementById('kf-body').value.trim();
@@ -3400,64 +3372,33 @@ function addKnowledge() {
   if (!title || !body) { alert('タイトルと本文は必須です'); return; }
   var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
   var kn = loadKnowledge();
-  kn.unshift({
+  
+  var newKnowledge = {
     id: 'k' + Date.now(),
     title: title,
     body: body,
     tags: tags,
     ts: Date.now()
-  });
-  saveKnowledge(kn);
-  toggleAddForm();
-  renderTagFilters();
-  renderKnowledge();
-}
-
-function deleteKnowledge(id) {
-  if (!confirm('このナレッジを削除しますか？')) return;
-  var kn = loadKnowledge().filter(function(k) { return k.id !== id; });
-  saveKnowledge(kn);
-  renderTagFilters();
-  renderKnowledge();
-}
-
-// ===== 初期化 =====
-function addKnowledge() {
-  var title = document.getElementById('kf-title').value.trim();
-  var body = document.getElementById('kf-body').value.trim();
-  var tagsRaw = document.getElementById('kf-tags').value.trim();
-  if (!title || !body) { alert('タイトルと本文は必須です'); return; }
-  var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
-  var kn = loadKnowledge();
-  kn.unshift({
-    id: 'k' + Date.now(),
-    title: title,
-    body: body,
-    tags: tags,
-    ts: Date.now()
-  });
+  };
+  kn.unshift(newKnowledge);
   saveKnowledge(kn);
   
-  // ⬇️ 修正箇所：追加したナレッジを出題用のグローバル変数にも即時反映する
-  KNOWLEDGE = kn;
+  KNOWLEDGE = kn; // 即時にグローバル同期
 
   toggleAddForm();
-  renderTagFilters();
   renderKnowledge();
 }
 
+// ⬇️ ナレッジ削除処理
 function deleteKnowledge(id) {
   if (!confirm('このナレッジを削除しますか？')) return;
   var kn = loadKnowledge().filter(function(k) { return k.id !== id; });
   saveKnowledge(kn);
+  
+  KNOWLEDGE = kn; // 即時にグローバル同期
 
-  // ⬇️ 修正箇所：削除した状態を出題用のグローバル変数にも即時反映する
-  KNOWLEDGE = kn;
-
-  renderTagFilters();
   renderKnowledge();
 }
-
 // ===== 初期化 =====
 // 1. 日付表示
 document.getElementById('header-date').textContent = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });

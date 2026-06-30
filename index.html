@@ -3271,10 +3271,18 @@ var KNOWLEDGE = [];
 function getRelatedKnowledge(questionText) {
   if (!KNOWLEDGE || KNOWLEDGE.length === 0) return [];
   return KNOWLEDGE.filter(function(k) {
-    return (k.tags || []).some(function(tag) {
-      if (!tag) return false;
-      return questionText.indexOf(tag) !== -1;
-    });
+    if (!k.title) return false;
+    
+    // タイトル（例：「水質汚濁防止法 第3条：排水基準」）から、
+    // 「水質汚濁防止法 第3条」や「水質汚濁防止法第3条」の部分（コロンより前）を抽出します
+    var cleanTitle = k.title.split('：')[0].split(':')[0].trim();
+    
+    // スペースの有無を無視して判定できるように調整（例：「水質汚濁防止法 第3条」と「水質汚濁防止法第3条」の両方にマッチ）
+    var titleNoSpace = cleanTitle.replace(/\s+/g, '');
+    var questionNoSpace = questionText.replace(/\s+/g, '');
+    
+    // 問題文にタイトル（法令・条文名）がピンポイントで含まれている場合のみ抽出
+    return questionNoSpace.indexOf(titleNoSpace) !== -1;
   });
 }
 

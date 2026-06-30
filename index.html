@@ -3006,7 +3006,9 @@ function renderQuiz() {
   var total = quizPool.length;
   document.getElementById('quiz-counter').textContent = '問題 ' + (quizIdx + 1) + ' / ' + total;
   document.getElementById('quiz-progress').style.width = (quizIdx / total * 100) + '%';
-document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+
+ document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
+  
   document.getElementById('quiz-question').textContent = 'Q' + (quizIdx + 1) + '. ' + q.question;
   document.getElementById('quiz-explanation').classList.remove('show');
   document.getElementById('quiz-explanation').innerHTML = '';
@@ -3027,6 +3029,7 @@ document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject
     answerQuiz(parseInt(btn.getAttribute('data-idx')), q);
   };
 }
+
 
 // ===== 過去問 =====
 var pastPool = [], pastIdx = 0;
@@ -3059,7 +3062,7 @@ document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject
   document.getElementById('past-next-wrap').innerHTML = '';
   var choicesEl = document.getElementById('past-choices');
   choicesEl.innerHTML = '';
-  var marks = ['①', '②', '③', '④'];
+  var marks = ['①', '②', '③', '④', '⑤'];
   q.choices.forEach(function(c, i) {
     var btn = document.createElement('button');
     btn.className = 'choice-btn';
@@ -3076,10 +3079,10 @@ document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject
 function answerPast(selected, q) {
   var choiceBtns = document.querySelectorAll('#past-choices .choice-btn');
   choiceBtns.forEach(function(b) { b.disabled = true; });
-  var correct = selected === q.answer;
+  var correct = (selected + 1) === q.answer;
   recordAnswer(q.id, q.subject, correct);
   choiceBtns.forEach(function(b, i) {
-    if (i === q.answer) b.classList.add('correct');
+    if (i === (q.answer - 1)) b.classList.add('correct');
     else if (i === selected && !correct) b.classList.add('wrong');
   });
   var exp = document.getElementById('past-explanation');
@@ -3090,10 +3093,10 @@ function answerPast(selected, q) {
 function answerQuiz(selected, q) {
   var choiceBtns = document.querySelectorAll('#quiz-choices .choice-btn');
   choiceBtns.forEach(function(b) { b.disabled = true; });
-  var correct = selected === q.answer;
+  var correct = (selected + 1) === q.answer; 
   recordAnswer(q.id, q.subject, correct);
   choiceBtns.forEach(function(b, i) {
-    if (i === q.answer) b.classList.add('correct');
+   if (i === (q.answer - 1)) b.classList.add('correct'); 
     else if (i === selected && !correct) b.classList.add('wrong');
   });
   var exp = document.getElementById('quiz-explanation');
@@ -3125,12 +3128,14 @@ function renderExam() {
   var total = examPool.length;
   document.getElementById('exam-counter').textContent = (examIdx + 1) + ' / ' + total;
   document.getElementById('exam-progress').style.width = (examIdx / total * 100) + '%';
-  document.getElementById('exam-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+
+ document.getElementById('exam-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
+  
   document.getElementById('exam-question').textContent = 'Q' + (examIdx + 1) + '. ' + q.question;
   document.getElementById('exam-next-wrap').innerHTML = '';
   var choicesEl = document.getElementById('exam-choices');
   choicesEl.innerHTML = '';
-  var marks = ['①', '②', '③', '④'];
+  var marks = ['①', '②', '③', '④', '⑤'];
   q.choices.forEach(function(c, i) {
     var btn = document.createElement('button');
     btn.className = 'choice-btn';
@@ -3149,8 +3154,8 @@ function answerExam(selected, q) {
   choiceBtns.forEach(function(b) { b.disabled = true; });
   examAnswers.push({ qid: q.id, selected: selected, answer: q.answer });
   choiceBtns.forEach(function(b, i) {
-    if (i === q.answer) b.classList.add('reveal');
-    else if (i === selected && selected !== q.answer) b.classList.add('wrong');
+    if (i === (q.answer - 1)) b.classList.add('reveal'); 
+   else if (i === selected && (selected + 1) !== q.answer) b.classList.add('wrong');
   });
   if (examIdx + 1 >= examPool.length) {
     document.getElementById('exam-next-wrap').innerHTML = '<button class="btn btn-success" onclick="finishExam()">採点する</button>';
@@ -3165,7 +3170,7 @@ function finishExam() {
   var pct = Math.round(correct / total * 100);
   examAnswers.forEach(function(a) {
     var q = QUESTIONS.filter(function(q) { return q.id === a.qid; })[0];
-    if (q) recordAnswer(q.id, q.subject, a.selected === a.answer);
+  if (q) recordAnswer(q.id, q.subject, (a.selected + 1) === a.answer);
   });
   var d = loadData();
   d.examHistory = d.examHistory || [];
@@ -3182,11 +3187,11 @@ function showExamReview() {
   var html = '<div class="card"><h2>📋 解説</h2>';
   examPool.forEach(function(q, i) {
     var ua = examAnswers[i];
-    var correct = ua && ua.selected === q.answer;
+  var correct = ua && (ua.selected + 1) === q.answer;
     html += '<div style="margin-bottom:20px;">';
     html += '<div style="margin-bottom:6px;"><span class="result-badge ' + (correct ? 'badge-correct' : 'badge-wrong') + '">' + (correct ? '正解' : '不正解') + '</span><span class="tag">' + q.subject + '</span></div>';
     html += '<div style="font-size:0.9rem;font-weight:600;margin-bottom:8px;">Q' + (i + 1) + '. ' + q.question + '</div>';
-    var marks = ['①', '②', '③', '④'];
+    var marks = ['①', '②', '③', '④', '⑤'];
     q.choices.forEach(function(c, ci) {
       var style = 'padding:6px 10px;border-radius:4px;margin:3px 0;font-size:0.85rem;';
       if (ci === q.answer) style += 'background:#eafaf1;border-left:4px solid #1e8449;';
@@ -3276,7 +3281,7 @@ function buildKnowledgeHTML(questionText) {
   list.forEach(function(k) {
     html += '<details class="knowledge-item">';
     html += '<summary>' + k.title + '</summary>';
-    html += '<div class="knowledge-content">' + k.content + '</div>';
+     html += '<div class="knowledge-content">' + k.body + '</div>';
     html += '</details>';
   });
   html += '</div>';
@@ -3411,7 +3416,50 @@ function deleteKnowledge(id) {
 }
 
 // ===== 初期化 =====
+function addKnowledge() {
+  var title = document.getElementById('kf-title').value.trim();
+  var body = document.getElementById('kf-body').value.trim();
+  var tagsRaw = document.getElementById('kf-tags').value.trim();
+  if (!title || !body) { alert('タイトルと本文は必須です'); return; }
+  var tags = tagsRaw ? tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean) : [];
+  var kn = loadKnowledge();
+  kn.unshift({
+    id: 'k' + Date.now(),
+    title: title,
+    body: body,
+    tags: tags,
+    ts: Date.now()
+  });
+  saveKnowledge(kn);
+  
+  // ⬇️ 修正箇所：追加したナレッジを出題用のグローバル変数にも即時反映する
+  KNOWLEDGE = kn;
+
+  toggleAddForm();
+  renderTagFilters();
+  renderKnowledge();
+}
+
+function deleteKnowledge(id) {
+  if (!confirm('このナレッジを削除しますか？')) return;
+  var kn = loadKnowledge().filter(function(k) { return k.id !== id; });
+  saveKnowledge(kn);
+
+  // ⬇️ 修正箇所：削除した状態を出題用のグローバル変数にも即時反映する
+  KNOWLEDGE = kn;
+
+  renderTagFilters();
+  renderKnowledge();
+}
+
+// ===== 初期化 =====
+// 1. 日付表示
 document.getElementById('header-date').textContent = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+
+// 2. ⬇️ 修正箇所：アプリ起動時にローカルストレージからナレッジデータを KNOWLEDGE にロードする
+KNOWLEDGE = loadKnowledge();
+
+// 3. 初期表示セクションの起動
 showSection('home');
 </script>
 </body>

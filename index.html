@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>計量士試験対策</title>
 <style>
+
 /* ===== リセット・基本 ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; -webkit-text-size-adjust: 100%; }
@@ -406,6 +407,7 @@ input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-c
     <div id="quiz-tag"></div>
     <div id="quiz-question" style="font-size:0.95rem;font-weight:600;margin:10px 0 14px;line-height:1.6;"></div>
     <div id="quiz-choices"></div>
+<div id="quiz-knowledge-area"></div> 
     <div id="quiz-explanation" class="explanation"></div>
     <div id="quiz-next-wrap" style="margin-top:10px;"></div>
   </div>
@@ -431,6 +433,7 @@ input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-c
       <div id="past-tag"></div>
       <div id="past-question" style="font-size:0.95rem;font-weight:600;margin:10px 0 14px;line-height:1.6;"></div>
       <div id="past-choices"></div>
+<div id="past-knowledge-area"></div>
       <div id="past-explanation" class="explanation"></div>
       <div id="past-next-wrap" style="margin-top:10px;"></div>
     </div>
@@ -454,6 +457,7 @@ input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-c
       <div id="exam-tag"></div>
       <div id="exam-question" style="font-size:0.95rem;font-weight:600;margin:10px 0 14px;line-height:1.6;"></div>
       <div id="exam-choices"></div>
+<div id="exam-knowledge-area"></div>
       <div id="exam-next-wrap" style="margin-top:10px;"></div>
     </div>
   </div>
@@ -2997,6 +3001,7 @@ function renderQuiz() {
     document.getElementById('quiz-choices').innerHTML = '';
     document.getElementById('quiz-explanation').classList.remove('show');
     document.getElementById('quiz-tag').innerHTML = '';
+    document.getElementById('quiz-knowledge-area').innerHTML = ''; // クリア
     document.getElementById('quiz-next-wrap').innerHTML = '<button class="btn btn-primary" onclick="initQuiz()">最初から</button>';
     document.getElementById('quiz-progress').style.width = '100%';
     document.getElementById('quiz-counter').textContent = '全' + quizPool.length + '問 完了';
@@ -3006,8 +3011,12 @@ function renderQuiz() {
   var total = quizPool.length;
   document.getElementById('quiz-counter').textContent = '問題 ' + (quizIdx + 1) + ' / ' + total;
   document.getElementById('quiz-progress').style.width = (quizIdx / total * 100) + '%';
-
- document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
+  
+  // 上部タグは科目のみに戻す
+  document.getElementById('quiz-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+  
+  // ⬇️ 選択肢の下にナレッジを挿入する
+  document.getElementById('quiz-knowledge-area').innerHTML = buildKnowledgeHTML(q.question);
   
   document.getElementById('quiz-question').textContent = 'Q' + (quizIdx + 1) + '. ' + q.question;
   document.getElementById('quiz-explanation').classList.remove('show');
@@ -3030,7 +3039,6 @@ function renderQuiz() {
   };
 }
 
-
 // ===== 過去問 =====
 var pastPool = [], pastIdx = 0;
 function startPast() {
@@ -3047,6 +3055,7 @@ function renderPast() {
     document.getElementById('past-choices').innerHTML = '';
     document.getElementById('past-explanation').classList.remove('show');
     document.getElementById('past-tag').innerHTML = '';
+    document.getElementById('past-knowledge-area').innerHTML = ''; // クリア
     document.getElementById('past-next-wrap').innerHTML = '<button class="btn btn-primary" onclick="startPast()">再挑戦</button>';
     document.getElementById('past-progress').style.width = '100%';
     return;
@@ -3055,7 +3064,13 @@ function renderPast() {
   var total = pastPool.length;
   document.getElementById('past-counter').textContent = '問題 ' + (pastIdx + 1) + ' / ' + total;
   document.getElementById('past-progress').style.width = (pastIdx / total * 100) + '%';
-document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
+  
+  // 上部タグは科目のみに戻す
+  document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+  
+  // ⬇️ 選択肢の下にナレッジを挿入する
+  document.getElementById('past-knowledge-area').innerHTML = buildKnowledgeHTML(q.question);
+  
   document.getElementById('past-question').textContent = 'Q' + (pastIdx + 1) + '. ' + q.question;
   document.getElementById('past-explanation').classList.remove('show');
   document.getElementById('past-explanation').innerHTML = '';
@@ -3066,7 +3081,7 @@ document.getElementById('past-tag').innerHTML = '<span class="tag">' + q.subject
   q.choices.forEach(function(c, i) {
     var btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = marks[i] + ' ' + c;
+    btn.textContent = (marks[i] || '') + ' ' + c;
     btn.setAttribute('data-idx', i);
     choicesEl.appendChild(btn);
   });
@@ -3128,8 +3143,12 @@ function renderExam() {
   var total = examPool.length;
   document.getElementById('exam-counter').textContent = (examIdx + 1) + ' / ' + total;
   document.getElementById('exam-progress').style.width = (examIdx / total * 100) + '%';
-
- document.getElementById('exam-tag').innerHTML = '<span class="tag">' + q.subject + '</span>' + buildKnowledgeHTML(q.question);
+  
+  // 上部タグは科目のみに戻す
+  document.getElementById('exam-tag').innerHTML = '<span class="tag">' + q.subject + '</span>';
+  
+  // ⬇️ 選択肢の下にナレッジを挿入する
+  document.getElementById('exam-knowledge-area').innerHTML = buildKnowledgeHTML(q.question);
   
   document.getElementById('exam-question').textContent = 'Q' + (examIdx + 1) + '. ' + q.question;
   document.getElementById('exam-next-wrap').innerHTML = '';
@@ -3139,7 +3158,7 @@ function renderExam() {
   q.choices.forEach(function(c, i) {
     var btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = marks[i] + ' ' + c;
+    btn.textContent = (marks[i] || '') + ' ' + c;
     btn.setAttribute('data-idx', i);
     choicesEl.appendChild(btn);
   });
@@ -3148,22 +3167,7 @@ function renderExam() {
     if (!btn || btn.disabled) return;
     answerExam(parseInt(btn.getAttribute('data-idx')), q);
   };
-}
-function answerExam(selected, q) {
-  var choiceBtns = document.querySelectorAll('#exam-choices .choice-btn');
-  choiceBtns.forEach(function(b) { b.disabled = true; });
-  examAnswers.push({ qid: q.id, selected: selected, answer: q.answer });
-  choiceBtns.forEach(function(b, i) {
-    if (i === (q.answer - 1)) b.classList.add('reveal'); 
-   else if (i === selected && (selected + 1) !== q.answer) b.classList.add('wrong');
-  });
-  if (examIdx + 1 >= examPool.length) {
-    document.getElementById('exam-next-wrap').innerHTML = '<button class="btn btn-success" onclick="finishExam()">採点する</button>';
-  } else {
-    document.getElementById('exam-next-wrap').innerHTML = '<button class="btn btn-primary" onclick="examIdx++;renderExam()">次の問題</button>';
-  }
-}
-function finishExam() {
+}function finishExam() {
   clearInterval(examTimer);
   var correct = examAnswers.filter(function(a) { return a.selected === a.answer; }).length;
   var total = examPool.length;
@@ -3206,7 +3210,7 @@ function showExamReview() {
 }
 function closeModal() { document.getElementById('result-modal').classList.remove('show'); }
 
-// ===== 弱点分析 =====
+
 // ===== 弱点分析 =====
 var SUBJECTS = ['環化', '環濃', '管理', '法規'];
 var SUBJECT_LABELS = { '環化': '環境計量士：環化', '環濃': '環境計量士：環濃', '管理': '計量管理', '法規': '計量法規' };  
@@ -3268,6 +3272,8 @@ function getRelatedKnowledge(questionText) {
   if (!KNOWLEDGE || KNOWLEDGE.length === 0) return [];
   return KNOWLEDGE.filter(function(k) {
     return k.tags.some(function(tag) {
+      // 単語の境界や「環境基本法第1条」などの完全一致キーワードを厳密にチェック
+      if (!tag) return false;
       return questionText.indexOf(tag) !== -1;
     });
   });
